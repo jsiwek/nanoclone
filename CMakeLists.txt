@@ -4,9 +4,15 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(nanomsg REQUIRED)
 
-include_directories(BEFORE
-                    ${NANOMSG_INCLUDE_DIR}
-)
+include_directories(BEFORE ${NANOMSG_INCLUDE_DIR})
+
+include(TestBigEndian)
+test_big_endian(NNC_BIGENDIAN)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 if ( NOT CMAKE_BUILD_TYPE )
     message(STATUS "Defaulting to 'RelWithDebInfo' build configuration.")
@@ -18,7 +24,18 @@ set(CMAKE_CXX_FLAGS       "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-add_executable(nanoclone main.cc)
+add_executable(nanoclone
+               frontend.cpp
+               frontend.hpp
+               backend.cpp
+               backend.hpp
+               main.cpp
+               messages.cpp
+               messages.hpp
+               type_aliases.hpp
+               util.cpp
+               util.hpp
+)
 target_link_libraries(nanoclone ${NANOMSG_LIBRARY})
 
 if ( CMAKE_BUILD_TYPE )
