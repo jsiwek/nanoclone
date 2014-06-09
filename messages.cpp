@@ -26,7 +26,7 @@ static const char* find_space(const char* msg, size_t size)
 			return msg;
 
 		++msg;
-		++size;
+		--size;
 		}
 
 	return nullptr;
@@ -489,8 +489,6 @@ void nnc::SnapshotResponse::DoPrepare()
 		ss << " ";
 		serialize_kv_pair(ss, it->first, it->second);
 		}
-
-	ss << " ";
 
 	SetMsg(ss.str());
 	}
