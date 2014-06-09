@@ -31,7 +31,8 @@ public:
 		{ return DoHasPendingOutput(); }
 
 	virtual bool GetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
-	                             fd_set* errorfds, timeval* timeout) const
+	                             fd_set* errorfds,
+	                             std::unique_ptr<timeval>* timeout) const
 		{ return DoGetSelectParams(nfds, readfds, writefds, errorfds, timeout);}
 
 	// May block.
@@ -45,7 +46,8 @@ private:
 	virtual bool DoClose() = 0;
 	virtual bool
 	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
-	                  fd_set* errorfds, timeval* timeout) const = 0;
+	                  fd_set* errorfds,
+	                  std::unique_ptr<timeval>* timeout) const = 0;
 };
 
 
@@ -75,7 +77,8 @@ private:
 	virtual bool DoClose() override;
 	virtual bool
 	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
-	                  fd_set* errorfds, timeval* timeout) const override;
+	                  fd_set* errorfds,
+	                  std::unique_ptr<timeval>* timeout) const override;
 
 	bool listening;
 	int rep_socket;
@@ -115,7 +118,8 @@ private:
 	virtual bool DoClose() override;
 	virtual bool
 	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
-	                  fd_set* errorfds, timeval* timeout) const override;
+	                  fd_set* errorfds,
+	                  std::unique_ptr<timeval>* timeout) const override;
 
 	bool connected;
 	int req_socket;

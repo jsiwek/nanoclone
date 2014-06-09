@@ -60,10 +60,13 @@ static bool set_nn_fds(int socket, int option, fd_set* fds, int* maxfd)
 	{
 	int fd;
 	size_t sz = sizeof(fd);
-	int res = nn_getsockopt(socket, option, NN_SOL_SOCKET, &fd, &sz);
+	int res = nn_getsockopt(socket, NN_SOL_SOCKET, option, &fd, &sz);
 
 	if ( res != 0 )
+		{
+		handle_nn_error("nn_getsockopt() failed: %s\n");
 		return false;
+		}
 
 	FD_SET(fd, fds);
 	*maxfd = max(*maxfd, fd);
@@ -203,10 +206,9 @@ bool nnc::AuthoritativeBackend::DoHasPendingOutput() const
 	return ! publications.empty() || pending_response;
 	}
 
-bool nnc::AuthoritativeBackend::DoGetSelectParams(int* nfds, fd_set* readfds,
-                                                  fd_set* writefds,
-                                                  fd_set* errorfds,
-                                                  timeval* timeout) const
+bool nnc::AuthoritativeBackend::DoGetSelectParams(
+        int* nfds, fd_set* readfds, fd_set* writefds, fd_set* errorfds,
+        unique_ptr<timeval>* timeout) const
 	{
 	if ( ! listening )
 		return false;
@@ -413,10 +415,18 @@ bool nnc::NonAuthoritativeBackend::DoHasPendingOutput() const
 	return true;
 	}
 
-bool nnc::NonAuthoritativeBackend::DoGetSelectParams(int* nfds, fd_set* readfds,
-                                                     fd_set* writefds,
-                                                     fd_set* errorfds,
-                                                     timeval* timeout) const
+static bool less_time(timeval t1, timeval t2)
+	{
+	if ( t1.tv_sec < t2.tv_sec )
+		return true;
+	if ( t1.tv_sec == t2.tv_sec )
+		return t1.tv_usec < t2.tv_usec;
+	return false;
+	}
+
+bool nnc::NonAuthoritativeBackend::DoGetSelectParams(
+        int* nfds, fd_set* readfds, fd_set* writefds, fd_set* errorfds,
+        unique_ptr<timeval>* timeout) const
 	{
 	if ( ! connected )
 		return false;
@@ -444,6 +454,22 @@ bool nnc::NonAuthoritativeBackend::DoGetSelectParams(int* nfds, fd_set* readfds,
 			{
 			if ( ! set_nn_fds(req_socket, NN_SNDFD, writefds, &maxfd) )
 				return false;
+			}
+		}
+
+	if ( timeout )
+		{
+		if ( ! requests.empty() && requests.front()->Sent() )
+			{
+			timeval time_left = requests.front()->UntilTimedOut();
+
+			if ( *timeout )
+				{
+				if ( less_time(time_left, *timeout->get()) )
+					timeout->reset(new timeval(time_left));
+				}
+			else
+				timeout->reset(new timeval(time_left));
 			}
 		}
 
