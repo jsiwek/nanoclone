@@ -490,6 +490,8 @@ void nnc::SnapshotResponse::DoPrepare()
 		serialize_kv_pair(ss, it->first, it->second);
 		}
 
+	ss << " ";
+
 	SetMsg(ss.str());
 	}
 
