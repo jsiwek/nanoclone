@@ -432,7 +432,8 @@ bool nnc::NonAuthoritativeBackend::DoGetSelectParams(
 
 	if ( timeout )
 		{
-		if ( ! requests.empty() && requests.front()->Sent() )
+		if ( ! requests.empty() && requests.front()->Sent() &&
+		     ! dynamic_cast<SnapshotRequest*>(requests.front().get()) )
 			{
 			timeval time_left = requests.front()->UntilTimedOut();
 
