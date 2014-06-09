@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -61,6 +62,8 @@ public:
 
 	bool SizeAsync(double timeout, size_cb cb) const
 		{ return DoSizeAsync(timeout, cb); }
+
+	void DumpDebug(FILE* out) const;
 
 protected:
 

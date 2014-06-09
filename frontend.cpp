@@ -4,12 +4,27 @@
 #include "util.hpp"
 
 #include <memory>
+#include <cinttypes>
 #include <assert.h>
 #include <nanomsg/nn.h>
 #include <nanomsg/pair.h>
 
 using namespace std;
 using namespace nnc;
+
+void nnc::Frontend::DumpDebug(FILE* out) const
+	{
+	string header = "========== Store " + topic + " Contents ==========";
+	fprintf(out, "%s\n", header.c_str());
+
+	for ( auto it = store.begin(); it != store.end(); ++it )
+		// TODO: technically keys aren't always printable c-strings
+		fprintf(out, "%s: %" PRIi64 "\n", it->first.c_str(), it->second);
+
+	for ( size_t i = 0; i < header.size(); ++i )
+		fprintf(out, "=");
+	fprintf(out, "\n");
+	}
 
 const nnc::value_type* nnc::Frontend::LookupSync(const nnc::key_type& key) const
 	{
