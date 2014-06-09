@@ -7,6 +7,7 @@
 #include <string>
 #include <exception>
 #include <memory>
+#include <sys/time.h>
 
 namespace nnc {
 
@@ -53,6 +54,11 @@ public:
 
 	double CreationTime() const
 		{ return creation_time; }
+
+	double Timeout() const
+		{ return timeout; }
+
+	timeval UntilTimedOut() const;
 
 	void MarkAsSent()
 		{ sent = true; }

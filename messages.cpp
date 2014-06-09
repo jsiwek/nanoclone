@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <utility>
+#include <cmath>
 #include <sys/time.h>
 
 using namespace std;
@@ -133,6 +134,22 @@ static inline kv_pair unserialize_kv_pair(const char** msg, size_t* size)
 nnc::Request::Request(const string& arg_topic, double arg_timeout)
 	: sent(false), topic(arg_topic), creation_time(now()), timeout(arg_timeout)
 	{
+	}
+
+timeval nnc::Request::UntilTimedOut() const
+	{
+	timeval rval;
+	rval.tv_sec = rval.tv_usec = 0;
+	double seconds_left = creation_time + timeout - now();
+
+	if ( seconds_left < 0 )
+		return rval;
+
+	double intp, fractp;
+	fractp = modf(seconds_left, &intp);
+	rval.tv_sec = intp;
+	rval.tv_usec = fractp * 1000000;
+	return rval;
 	}
 
 bool nnc::Request::DoTimedOut() const
