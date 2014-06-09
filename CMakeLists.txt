@@ -17,11 +17,13 @@ set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 add_executable(nanoclone
+               main.cpp
+               client.cpp
+               server.cpp
                frontend.cpp
                frontend.hpp
                backend.cpp
                backend.hpp
-               main.cpp
                messages.cpp
                messages.hpp
                type_aliases.hpp
