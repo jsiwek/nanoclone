@@ -132,7 +132,7 @@ static inline kv_pair unserialize_kv_pair(const char** msg, size_t* size)
 	}
 
 nnc::Request::Request(const string& arg_topic, double arg_timeout)
-	: sent(false), topic(arg_topic), creation_time(now()), timeout(arg_timeout)
+	: topic(arg_topic), creation_time(now()), timeout(arg_timeout)
 	{
 	}
 

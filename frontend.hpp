@@ -21,7 +21,8 @@ class Publication;
 class Frontend {
 public:
 
-	Frontend(const std::string& topic);
+	Frontend(const std::string& arg_topic)
+		: topic(arg_topic) {}
 
 	virtual ~Frontend() {}
 
@@ -46,9 +47,11 @@ public:
 
 	const value_type* LookupSync(const key_type& key) const;
 
-	bool HasKeySync(const key_type& key) const;
+	bool HasKeySync(const key_type& key) const
+		{ return store.find(key) != store.end(); }
 
-	size_t SizeSync() const;
+	size_t SizeSync() const
+		{ return store.size(); }
 
 	bool LookupAsync(const key_type& key, double timeout, lookup_cb cb) const
 		{ return DoLookupAsync(key, timeout, cb); }
@@ -63,7 +66,7 @@ protected:
 
 	std::string topic;
 	kv_store_type store;
-	uint64_t sequence;
+	uint64_t sequence = 0;
 
 private:
 
@@ -85,7 +88,8 @@ class Response;
 class AuthoritativeFrontend : public Frontend {
 public:
 
-	AuthoritativeFrontend(const std::string& topic);
+	AuthoritativeFrontend(const std::string& topic)
+		: Frontend(topic) {}
 
 	bool AddBackend(AuthoritativeBackend* backend);
 	bool RemBackend(AuthoritativeBackend* backend);
@@ -113,7 +117,8 @@ private:
 class NonAuthoritativeFrontend : public Frontend {
 public:
 
-	NonAuthoritativeFrontend(const std::string& topic);
+	NonAuthoritativeFrontend(const std::string& topic)
+		: Frontend(topic) {}
 
 	bool Pair(NonAuthoritativeBackend* backend);
 	bool Unpair();
@@ -135,9 +140,9 @@ private:
 	                           haskey_cb cb) const override;
 	virtual bool DoSizeAsync(double timeout, size_cb cb) const override;
 
-	NonAuthoritativeBackend* backend;
+	NonAuthoritativeBackend* backend = nullptr;
 	std::queue<std::unique_ptr<Publication>> pub_backlog;
-	bool synchronized;
+	bool synchronized = false;
 };
 
 } // namespace nnc

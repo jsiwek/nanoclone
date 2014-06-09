@@ -20,7 +20,7 @@ class NonAuthoritativeFrontend;
 class Backend {
 public:
 
-	Backend();
+	Backend() = default;
 
 	virtual ~Backend() {}
 
@@ -54,9 +54,12 @@ private:
 class AuthoritativeBackend : public Backend {
 public:
 
-	AuthoritativeBackend();
+	AuthoritativeBackend() = default;
 
-	virtual ~AuthoritativeBackend();
+	// If there are unsent publications, that means any subscribers are
+	// going to be out of sync and have to request a snapshot if an equivalent
+	// backend ever comes back up.
+	virtual ~AuthoritativeBackend() {}
 
 	bool Listen(const std::string& reply_addr, const std::string& pub_addr,
 	            const std::string& pull_addr);
@@ -80,22 +83,22 @@ private:
 	                  fd_set* errorfds,
 	                  std::unique_ptr<timeval>* timeout) const override;
 
-	bool listening;
-	int rep_socket;
-	int pub_socket;
-	int pul_socket;
+	bool listening = false;
+	int rep_socket = -1;
+	int pub_socket = -1;
+	int pul_socket = -1;
 	std::unordered_map<std::string, AuthoritativeFrontend*> frontends;
 	std::queue<std::shared_ptr<Publication>> publications;
-	std::unique_ptr<Response> pending_response;
+	std::unique_ptr<Response> pending_response = nullptr;
 };
 
 
 class NonAuthoritativeBackend : public Backend {
 public:
 
-	NonAuthoritativeBackend();
+	NonAuthoritativeBackend() = default;
 
-	virtual ~NonAuthoritativeBackend();
+	virtual ~NonAuthoritativeBackend() {}
 
 	bool Connect(const std::string& request_addr, const std::string& sub_addr,
 	             const std::string& push_addr);
@@ -121,10 +124,10 @@ private:
 	                  fd_set* errorfds,
 	                  std::unique_ptr<timeval>* timeout) const override;
 
-	bool connected;
-	int req_socket;
-	int sub_socket;
-	int psh_socket;
+	bool connected = false;
+	int req_socket = -1;
+	int sub_socket = -1;
+	int psh_socket = -1;
 	std::unordered_map<std::string, NonAuthoritativeFrontend*> frontends;
 	std::list<std::unique_ptr<Request>> requests;
 	std::queue<std::unique_ptr<Update>> updates;

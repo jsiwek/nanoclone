@@ -11,11 +11,6 @@
 using namespace std;
 using namespace nnc;
 
-nnc::Frontend::Frontend(const string& arg_topic)
-	: topic(arg_topic), store(), sequence(0)
-	{
-	}
-
 const nnc::value_type* nnc::Frontend::LookupSync(const nnc::key_type& key) const
 	{
 	auto it = store.find(key);
@@ -24,21 +19,6 @@ const nnc::value_type* nnc::Frontend::LookupSync(const nnc::key_type& key) const
 		return nullptr;
 
 	return &it->second;
-	}
-
-bool nnc::Frontend::HasKeySync(const key_type& key) const
-	{
-	return store.find(key) != store.end();
-	}
-
-size_t nnc::Frontend::SizeSync() const
-	{
-	return store.size();
-	}
-
-nnc::AuthoritativeFrontend::AuthoritativeFrontend(const string& topic)
-	: nnc::Frontend(topic), backends()
-	{
 	}
 
 bool nnc::AuthoritativeFrontend::AddBackend(AuthoritativeBackend* backend)
@@ -149,11 +129,6 @@ bool nnc::AuthoritativeFrontend::DoSizeAsync(double timeout, size_cb cb) const
 	{
 	cb(store.size(), ASYNC_SUCCESS);
 	return true;
-	}
-
-nnc::NonAuthoritativeFrontend::NonAuthoritativeFrontend(const string& topic)
-	: nnc::Frontend(topic), backend(nullptr), pub_backlog(), synchronized(false)
-	{
 	}
 
 bool

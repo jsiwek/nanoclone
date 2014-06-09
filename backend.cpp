@@ -73,23 +73,6 @@ static bool set_nn_fds(int socket, int option, fd_set* fds, int* maxfd)
 	return true;
 	}
 
-nnc::Backend::Backend()
-	{
-	}
-
-nnc::AuthoritativeBackend::AuthoritativeBackend()
-	: nnc::Backend(), listening(false), rep_socket(-1), pub_socket(-1),
-	  pul_socket(-1), frontends(), publications(), pending_response(nullptr)
-	{
-	}
-
-nnc::AuthoritativeBackend::~AuthoritativeBackend()
-	{
-	// If there are unsent publications, that means any subscribers are
-	// going to be out of sync and have to request a snapshot if an equivalent
-	// backend ever comes back up.
-	}
-
 bool nnc::AuthoritativeBackend::AddFrontend(AuthoritativeFrontend* frontend)
 	{
 	using vt = decltype(frontends)::value_type;
@@ -254,16 +237,6 @@ bool nnc::AuthoritativeBackend::DoClose()
 	rep_socket = pub_socket = pul_socket = -1;
 	listening = false;
 	return true;
-	}
-
-nnc::NonAuthoritativeBackend::NonAuthoritativeBackend()
-	: nnc::Backend(), connected(), req_socket(-1), sub_socket(-1),
-	  psh_socket(-1), frontends(), requests(), updates()
-	{
-	}
-
-nnc::NonAuthoritativeBackend::~NonAuthoritativeBackend()
-	{
 	}
 
 bool nnc::NonAuthoritativeBackend::AddFrontend(NonAuthoritativeFrontend* fe)

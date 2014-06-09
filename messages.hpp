@@ -19,6 +19,8 @@ class parse_error : public std::exception {
 class Message {
 public:
 
+	Message() = default;
+
 	virtual ~Message() {}
 
 	const std::string& Msg()
@@ -88,7 +90,7 @@ private:
 	virtual bool DoProcess(std::unique_ptr<Response> response,
 	                       NonAuthoritativeFrontend* frontend) const = 0;
 
-	bool sent;
+	bool sent = false;
 	std::string topic;
 	double creation_time;
 	double timeout;
