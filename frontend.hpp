@@ -98,7 +98,7 @@ private:
 	virtual bool DoRemove(const key_type& key) override;
 	virtual bool DoIncrement(const key_type& key,const value_type& by) override;
 	virtual bool DoDecrement(const key_type& key,const value_type& by) override;
-	virtual bool DoClear() = 0;
+	virtual bool DoClear() override;
 
 	virtual bool DoLookupAsync(const key_type& key, double timeout,
 	                           lookup_cb cb) const override;
@@ -127,7 +127,7 @@ private:
 	virtual bool DoRemove(const key_type& key) override;
 	virtual bool DoIncrement(const key_type& key,const value_type& by) override;
 	virtual bool DoDecrement(const key_type& key,const value_type& by) override;
-	virtual bool DoClear() = 0;
+	virtual bool DoClear() override;
 
 	virtual bool DoLookupAsync(const key_type& key, double timeout,
 	                           lookup_cb cb) const override;
