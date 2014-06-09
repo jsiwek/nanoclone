@@ -6,14 +6,6 @@ find_package(nanomsg REQUIRED)
 
 include_directories(BEFORE ${NANOMSG_INCLUDE_DIR})
 
-include(TestBigEndian)
-test_big_endian(NNC_BIGENDIAN)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-
 if ( NOT CMAKE_BUILD_TYPE )
     message(STATUS "Defaulting to 'RelWithDebInfo' build configuration.")
     set(CMAKE_BUILD_TYPE RelWithDebInfo)

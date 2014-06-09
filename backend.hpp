@@ -3,7 +3,11 @@
 
 #include "messages.hpp"
 
+#include <sys/select.h>
+#include <memory>
 #include <string>
+#include <queue>
+#include <list>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -20,13 +24,28 @@ public:
 
 	virtual ~Backend() {}
 
+	bool ProcessIO()
+		{ return DoProcessIO(); }
+
+	bool HasPendingOutput() const
+		{ return DoHasPendingOutput(); }
+
+	virtual bool SetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	                             fd_set* errorfds, timeval* timeout) const
+		{ return DoSetSelectParams(nfds, readfds, writefds, errorfds, timeout);}
+
 	// May block.
 	bool Close()
 		{ return DoClose(); }
 
 private:
 
+	virtual bool DoProcessIO() = 0;
+	virtual bool DoHasPendingOutput() const = 0;
 	virtual bool DoClose() = 0;
+	virtual bool
+	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	                  fd_set* errorfds, timeval* timeout) const = 0;
 };
 
 
@@ -34,6 +53,8 @@ class AuthoritativeBackend : public Backend {
 public:
 
 	AuthoritativeBackend();
+
+	virtual ~AuthoritativeBackend();
 
 	bool Listen(const std::string& reply_addr, const std::string& pub_addr,
 	            const std::string& pull_addr);
@@ -45,17 +66,24 @@ public:
 
 	bool RemFrontend(AuthoritativeFrontend* frontend);
 
-	bool Publish(const Publication* publication);
+	bool Publish(std::shared_ptr<Publication> publication);
 
 private:
 
+	virtual bool DoProcessIO() override;
+	virtual bool DoHasPendingOutput() const override;
 	virtual bool DoClose() override;
+	virtual bool
+	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	                  fd_set* errorfds, timeval* timeout) const override;
 
 	bool listening;
 	int rep_socket;
 	int pub_socket;
 	int pul_socket;
 	std::unordered_map<std::string, AuthoritativeFrontend*> frontends;
+	std::queue<std::shared_ptr<Publication>> publications;
+	std::unique_ptr<Response> pending_response;
 };
 
 
@@ -63,6 +91,8 @@ class NonAuthoritativeBackend : public Backend {
 public:
 
 	NonAuthoritativeBackend();
+
+	virtual ~NonAuthoritativeBackend();
 
 	bool Connect(const std::string& request_addr, const std::string& sub_addr,
 	             const std::string& push_addr);
@@ -74,19 +104,26 @@ public:
 
 	bool RemFrontend(NonAuthoritativeFrontend* frontend);
 
-	bool SendRequest(const Request* request);
+	bool SendRequest(Request* request);
 
-	bool SendUpdate(const Update* update);
+	bool SendUpdate(Update* update);
 
 private:
 
+	virtual bool DoProcessIO() override;
+	virtual bool DoHasPendingOutput() const override;
 	virtual bool DoClose() override;
+	virtual bool
+	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	                  fd_set* errorfds, timeval* timeout) const override;
 
 	bool connected;
 	int req_socket;
 	int sub_socket;
 	int psh_socket;
 	std::unordered_map<std::string, NonAuthoritativeFrontend*> frontends;
+	std::list<std::unique_ptr<Request>> requests;
+	std::queue<std::unique_ptr<Update>> updates;
 };
 
 } // namespace nnc

@@ -2,18 +2,21 @@
 #define NANOCLONE_FRONTEND_HPP
 
 #include "type_aliases.hpp"
-#include "messages.hpp"
 
+#include <memory>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <queue>
 
 namespace nnc {
 
 class Backend;
 class AuthoritativeBackend;
 class NonAuthoritativeBackend;
+class Response;
+class Publication;
 
 class Frontend {
 public:
@@ -60,7 +63,7 @@ protected:
 
 	std::string topic;
 	kv_store_type store;
-	uint64_t sequence; // TODO: what can be done about overflows?
+	uint64_t sequence;
 
 private:
 
@@ -77,6 +80,7 @@ private:
 	virtual bool DoSizeAsync(double timeout, size_cb cb) const = 0;
 };
 
+class Response;
 
 class AuthoritativeFrontend : public Frontend {
 public:
@@ -85,6 +89,8 @@ public:
 
 	bool AddBackend(AuthoritativeBackend* backend);
 	bool RemBackend(AuthoritativeBackend* backend);
+
+	std::unique_ptr<Response> Snapshot() const;
 
 private:
 
@@ -100,8 +106,6 @@ private:
 	                           haskey_cb cb) const override;
 	virtual bool DoSizeAsync(double timeout, size_cb cb) const override;
 
-	bool Publish(const Publication* publications) const;
-
 	std::unordered_set<AuthoritativeBackend*> backends;
 };
 
@@ -113,6 +117,9 @@ public:
 
 	bool Pair(NonAuthoritativeBackend* backend);
 	bool Unpair();
+
+	bool ProcessPublication(std::unique_ptr<Publication> pub);
+	bool ApplySnapshot(std::unique_ptr<Response> snapshot);
 
 private:
 
@@ -129,6 +136,8 @@ private:
 	virtual bool DoSizeAsync(double timeout, size_cb cb) const override;
 
 	NonAuthoritativeBackend* backend;
+	std::queue<std::unique_ptr<Publication>> pub_backlog;
+	bool synchronized;
 };
 
 } // namespace nnc
