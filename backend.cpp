@@ -203,7 +203,7 @@ bool nnc::AuthoritativeBackend::DoHasPendingOutput() const
 	return ! publications.empty() || pending_response;
 	}
 
-bool nnc::AuthoritativeBackend::DoSetSelectParams(int* nfds, fd_set* readfds,
+bool nnc::AuthoritativeBackend::DoGetSelectParams(int* nfds, fd_set* readfds,
                                                   fd_set* writefds,
                                                   fd_set* errorfds,
                                                   timeval* timeout) const
@@ -413,7 +413,7 @@ bool nnc::NonAuthoritativeBackend::DoHasPendingOutput() const
 	return true;
 	}
 
-bool nnc::NonAuthoritativeBackend::DoSetSelectParams(int* nfds, fd_set* readfds,
+bool nnc::NonAuthoritativeBackend::DoGetSelectParams(int* nfds, fd_set* readfds,
                                                      fd_set* writefds,
                                                      fd_set* errorfds,
                                                      timeval* timeout) const

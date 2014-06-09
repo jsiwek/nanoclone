@@ -30,9 +30,9 @@ public:
 	bool HasPendingOutput() const
 		{ return DoHasPendingOutput(); }
 
-	virtual bool SetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	virtual bool GetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
 	                             fd_set* errorfds, timeval* timeout) const
-		{ return DoSetSelectParams(nfds, readfds, writefds, errorfds, timeout);}
+		{ return DoGetSelectParams(nfds, readfds, writefds, errorfds, timeout);}
 
 	// May block.
 	bool Close()
@@ -44,7 +44,7 @@ private:
 	virtual bool DoHasPendingOutput() const = 0;
 	virtual bool DoClose() = 0;
 	virtual bool
-	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
 	                  fd_set* errorfds, timeval* timeout) const = 0;
 };
 
@@ -74,7 +74,7 @@ private:
 	virtual bool DoHasPendingOutput() const override;
 	virtual bool DoClose() override;
 	virtual bool
-	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
 	                  fd_set* errorfds, timeval* timeout) const override;
 
 	bool listening;
@@ -114,7 +114,7 @@ private:
 	virtual bool DoHasPendingOutput() const override;
 	virtual bool DoClose() override;
 	virtual bool
-	DoSetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
+	DoGetSelectParams(int* nfds, fd_set* readfds, fd_set* writefds,
 	                  fd_set* errorfds, timeval* timeout) const override;
 
 	bool connected;
